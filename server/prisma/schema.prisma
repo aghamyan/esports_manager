@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id             String             @id @default(cuid())
+  psnId          String             @unique
+  displayName    String
+  favoriteTeam   String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  homeMatches    Match[]            @relation("HomePlayerMatches")
+  awayMatches    Match[]            @relation("AwayPlayerMatches")
+  tournaments    TournamentPlayer[]
+}
+
+model Tournament {
+  id                String             @id @default(cuid())
+  name              String
+  format            String?
+  startsAt          DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  matches           Match[]
+  tournamentPlayers TournamentPlayer[]
+}
+
+model Match {
+  id           String      @id @default(cuid())
+  homePlayerId String
+  awayPlayerId String
+  tournamentId String?
+  homeScore    Int?
+  awayScore    Int?
+  platform     String      @default("PS5")
+  playedAt     DateTime    @default(now())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  homePlayer   Player      @relation("HomePlayerMatches", fields: [homePlayerId], references: [id])
+  awayPlayer   Player      @relation("AwayPlayerMatches", fields: [awayPlayerId], references: [id])
+  tournament   Tournament? @relation(fields: [tournamentId], references: [id])
+}
+
+model TournamentPlayer {
+  id           String     @id @default(cuid())
+  playerId     String
+  tournamentId String
+  seed         Int?
+  points       Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  player       Player     @relation(fields: [playerId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([playerId, tournamentId])
+}
