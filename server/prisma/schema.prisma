@@ -9,11 +9,10 @@ datasource db {
 
 model Player {
   id             String             @id @default(cuid())
-  psnId          String             @unique
-  displayName    String
-  favoriteTeam   String?
+  fullName       String
+  nickname       String             @unique
+  psnId          String?
   createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
   homeMatches    Match[]            @relation("HomePlayerMatches")
   awayMatches    Match[]            @relation("AwayPlayerMatches")
   tournaments    TournamentPlayer[]
