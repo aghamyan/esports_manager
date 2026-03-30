@@ -36,6 +36,21 @@ app.use('/api/matches', matchesRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(env.port, () => {
+console.log(`[startup] Loaded PORT=${env.port}`);
+console.log(`[startup] Loaded CORS_ORIGIN=${env.corsOrigin}`);
+console.log(`[startup] DATABASE_URL is ${env.databaseUrl ? 'set' : 'missing'}`);
+
+const server = app.listen(env.port, () => {
   console.log(`Server running on http://localhost:${env.port}`);
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(
+      `Port ${env.port} is already in use. Change PORT in server/.env or stop the existing process.`,
+    );
+    process.exit(1);
+  }
+
+  throw error;
 });
