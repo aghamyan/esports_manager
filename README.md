@@ -63,10 +63,16 @@ npm run install:all
 
 ### 4) Configure environment variables
 
-Create `server/.env`:
+Create `server/.env` (exact example):
 
 ```env
+# Backend port (use 5001 if 5000 is busy)
 PORT=5000
+
+# React app origin allowed by CORS
+CORS_ORIGIN=http://localhost:5173
+
+# PostgreSQL connection used by Prisma
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fc26_manager?schema=public"
 ```
 
@@ -79,15 +85,32 @@ VITE_API_URL=http://localhost:5000
 
 ## Player CRUD setup and usage
 
-### Prisma migration command (exact)
+### Prisma datasource config (exact)
 
-From project root:
+`server/prisma/schema.prisma`:
 
-```bash
-npm run prisma:migrate --prefix server -- --name player_crud
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 ```
 
-If needed, regenerate Prisma client:
+### Commands (exact)
+
+Create the database:
+
+```bash
+psql -U postgres -h localhost -c "CREATE DATABASE fc26_manager;"
+```
+
+Run Prisma migration:
+
+```bash
+npm run prisma:migrate --prefix server -- --name init
+```
+
+If needed, generate Prisma client:
 
 ```bash
 npm run prisma:generate --prefix server
@@ -100,6 +123,7 @@ npm run dev:server
 ```
 
 Backend runs at `http://localhost:5000`.
+If port `5000` is in use, set `PORT=5001` in `server/.env` and restart.
 
 ### Start frontend (exact)
 
@@ -119,9 +143,15 @@ Frontend runs at `http://localhost:5173`.
   - `PUT /api/players/:id` (update)
   - `DELETE /api/players/:id` (delete)
 
+### Health routes
+
+- `GET /api/health` (backend status)
+- `GET /api/health/db` (simple PostgreSQL connectivity check)
+
 ## API endpoints
 
-- `GET /health`
+- `GET /api/health`
+- `GET /api/health/db`
 - `GET /api/players`
 - `GET /api/players/:id`
 - `POST /api/players`
@@ -146,4 +176,3 @@ Validation rules:
 - `fullName` is required.
 - `nickname` is required and must be unique.
 - `psnId` is optional.
-
